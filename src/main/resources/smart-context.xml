@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-4.0.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--扫描类包，自动转化bean，同时完成bean注入-->
+    <context:component-scan base-package="com.smart.dao"/>
+    <context:component-scan base-package="com.smart.service"/>
+    <!--<context:component-scan base-package="com.smart.web"/>-->
+
+    <!--定义一个dbcp实现的数据源bean-->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+          destroy-method="close"
+          p:driverClassName="com.mysql.jdbc.Driver"
+          p:url="jdbc:mysql://localhost:3306/sampledb"
+          p:username="root"
+          p:password="" />
+
+    <!--定义一个JDBC模版bean,并绑定数据源-->
+    <bean id="jdbcTemplate"
+          class="org.springframework.jdbc.core.JdbcTemplate"
+          p:dataSource-ref="dataSource" />
+
+    <!--定义一个事物管理器bean，并绑定数据源-->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+          p:dataSource-ref="dataSource"/>
+
+    <!--通过AOP配置提供事物增强，让service包下所有的Bean的所有方法拥有事物（所有对数据库的操作都拥有事物），通过注解声明@Transactional-->
+    <aop:config proxy-target-class="true">
+        <aop:pointcut id="serviceMethod" expression=" (execution(* com.smart.service..*(..))) and
+                    (@annotation(org.springframework.transaction.annotation.Transactional))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="serviceMethod"/>
+    </aop:config>
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+
+
+
+
+    <!--<bean-->
+        <!--class="org.springframework.web.servlet.view.InternalResourceViewResolver"-->
+        <!--p:viewClass="org.springframework.web.servlet.view.JstlView"-->
+        <!--p:prefix="/WEB-INF/jsp/"-->
+        <!--p:suffix=".jsp"/>-->
+</beans>

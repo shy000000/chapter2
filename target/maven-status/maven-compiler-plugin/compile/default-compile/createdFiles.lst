@@ -1,0 +1,7 @@
+com/smart/web/LoginController.class
+com/smart/dao/LoginLogDao.class
+com/smart/service/UserService.class
+com/smart/domain/User.class
+com/smart/dao/UserDao.class
+com/smart/domain/LoginLog.class
+com/smart/web/LoginCommand.class
